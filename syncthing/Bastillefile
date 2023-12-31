@@ -1,22 +1,23 @@
 # adapted from https://codeberg.org/wegtam/bastille-syncthing/
-ARG SYNC_DIR=/tmp/syncthing
+ARG HOST_DIR=/data/syncthing
+ARG TARG_DIR=/data/syncthing
 CP usr /
 
 PKG syncthing
 SYSRC syncthing_enable=YES
-CMD mkdir -p /srv/syncthing
-CMD chown syncthing:syncthing /srv/syncthing
-RDR tcp 8385 8384
-RDR tcp 22001 22000
-RDR udp 21028 21027
-MOUNT ${SYNC_DIR} /srv/syncthing nullfs rw 0 0
-CMD chown syncthing:syncthing /srv/syncthing
+CMD mkdir -p ${TARG_DIR}
+CMD chown syncthing:syncthing ${TARG_DIR}
+RDR tcp 8384 8384
+RDR tcp 22000 22000
+RDR udp 21027 21027
+MOUNT ${HOST_DIR} ${TARG_DIR} nullfs rw 0 0
+CMD chown syncthing:syncthing ${TARG_DIR}
 
 # create the default files.
 CMD syncthing generate --config=/usr/local/etc/syncthing
 
 CMD sed -i '' -e 's/127\.0\.0\.1/0\.0\.0\.0/' /usr/local/etc/syncthing/config.xml
-CMD sed -i '' -e 's/path="\/root\/Sync"/path="\/srv\/syncthing\/default"/' /usr/local/etc/syncthing/config.xml
+CMD sed -i '' -e 's/path="\/root\/Sync"/path="\/data\/syncthing\/default"/' /usr/local/etc/syncthing/config.xml
 CMD sed -i '' -e 's/tls="false"/tls="true"/' /usr/local/etc/syncthing/config.xml
 
 CMD chown -R syncthing:syncthing /usr/local/etc/syncthing
